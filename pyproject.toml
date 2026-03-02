@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.backends._legacy:_Backend"
+
+[project]
+name = "btc-threat-sim"
+version = "0.1.0"
+description = "AI-Driven Bitcoin Network Threat Simulator"
+requires-python = ">=3.12"
+dependencies = [
+    "numpy",
+    "scipy",
+    "networkx",
+    "rich",
+]
+
+[project.optional-dependencies]
+dev = ["pytest"]
+
+[project.scripts]
+btc-threat-sim = "btc_threat_sim.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
