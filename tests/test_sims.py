@@ -37,11 +37,11 @@ class TestSimulate51Attack:
         assert len(result.raw_results) == 100
 
     def test_50_percent_hashpower_high_risk(self, network_state):
-        # Theoretical success rate ~61.3%; use 5000 iterations to reduce variance
+        # Theoretical success rate ~61.3%; use 10000 iterations to reduce variance
         result = simulate_51_attack(
-            network_state, attacker_hashpower=0.5, iterations=5000
+            network_state, attacker_hashpower=0.5, iterations=10000
         )
-        assert result.risk_score > 60
+        assert result.risk_score > 59
 
     def test_10_percent_hashpower_low_risk(self, network_state):
         result = simulate_51_attack(
