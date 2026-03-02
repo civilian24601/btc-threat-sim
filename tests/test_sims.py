@@ -8,6 +8,7 @@ from btc_threat_sim.data import build_network_graph
 from btc_threat_sim.models import SimResult
 from btc_threat_sim.sims.fifty_one import simulate_51_attack
 from btc_threat_sim.sims.quantum import simulate_quantum_threat
+from btc_threat_sim.sims.game_theory import simulate_game_theory
 
 
 @pytest.fixture
@@ -180,3 +181,61 @@ class TestSimulateQuantumThreat:
             network_state, quantum_capability=0.9, iterations=5000
         )
         assert high.metadata["time_to_break_mean"] < low.metadata["time_to_break_mean"]
+
+
+# ---------- Game theory tests ----------
+
+
+class TestSimulateGameTheory:
+    """Tests for the game theory defection simulation."""
+
+    def test_returns_sim_result(self, network_state):
+        result = simulate_game_theory(network_state, iterations=100)
+        assert isinstance(result, SimResult)
+        assert result.scenario == "game_theory"
+
+    def test_risk_score_in_valid_range(self, network_state):
+        result = simulate_game_theory(network_state, iterations=1000)
+        assert 0.0 <= result.risk_score <= 100.0
+
+    def test_equilibrium_converged(self, network_state):
+        result = simulate_game_theory(network_state, iterations=100)
+        assert result.metadata["equilibrium_converged"] is True
+
+    def test_nash_p_cooperate_in_range(self, network_state):
+        result = simulate_game_theory(network_state, iterations=100)
+        assert 0.0 <= result.metadata["nash_p_cooperate"] <= 1.0
+
+    def test_pool_incentives_present(self, network_state):
+        result = simulate_game_theory(network_state, iterations=100)
+        incentives = result.metadata["pool_incentives"]
+        assert isinstance(incentives, dict)
+        assert len(incentives) == len(list(network_state.graph.nodes))
+
+    def test_larger_pools_higher_defection_incentive(self, network_state):
+        result = simulate_game_theory(network_state, iterations=100)
+        incentives = result.metadata["pool_incentives"]
+        # Foundry (28%) should have higher incentive than ViaBTC (10%)
+        assert incentives["Foundry"] > incentives["ViaBTC"]
+
+    def test_all_incentives_in_valid_range(self, network_state):
+        result = simulate_game_theory(network_state, iterations=100)
+        for pool, score in result.metadata["pool_incentives"].items():
+            assert 0.0 <= score <= 1.0, f"{pool} incentive {score} out of range"
+
+    def test_has_valid_statistics(self, network_state):
+        result = simulate_game_theory(network_state, iterations=500)
+        assert 0.0 <= result.mean <= 1.0
+        assert result.std_dev >= 0.0
+        assert result.iterations == 500
+        assert len(result.raw_results) == 500
+
+    def test_metadata_contains_required_keys(self, network_state):
+        result = simulate_game_theory(network_state, iterations=100)
+        for key in [
+            "nash_p_cooperate",
+            "nash_expected_payoff",
+            "pool_incentives",
+            "equilibrium_converged",
+        ]:
+            assert key in result.metadata
