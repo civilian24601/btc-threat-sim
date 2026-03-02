@@ -1,8 +1,5 @@
 """Report formatting and output."""
 
-import json
-from dataclasses import asdict
-
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table

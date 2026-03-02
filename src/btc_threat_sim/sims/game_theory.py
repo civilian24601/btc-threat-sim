@@ -1,7 +1,6 @@
 """Game-theoretic defection scenario simulation."""
 
 import numpy as np
-from scipy.optimize import linprog
 
 from btc_threat_sim.models import NetworkState, SimResult
 

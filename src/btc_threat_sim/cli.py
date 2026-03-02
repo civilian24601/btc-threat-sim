@@ -2,6 +2,7 @@
 
 import argparse
 import json
+import logging
 import sys
 
 from btc_threat_sim.agents.data_agent import DataAgent
@@ -9,6 +10,8 @@ from btc_threat_sim.agents.sim_agent import SimAgent
 from btc_threat_sim.agents.strategy_agent import StrategyAgent
 from btc_threat_sim.models import PoolData, ThreatReport
 from btc_threat_sim.report import format_console_report, format_json_report
+
+log = logging.getLogger("btc_threat_sim")
 
 SCENARIOS = ["51_attack", "quantum_break", "game_theory"]
 
@@ -166,17 +169,44 @@ def _run_scenario(args: argparse.Namespace, scenario: str) -> ThreatReport:
 
 def main(argv: list[str] | None = None) -> None:
     """Entry point for the btc-threat-sim CLI."""
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(levelname)s: %(message)s",
+    )
+
     parser = _build_parser()
     args = parser.parse_args(argv)
+
+    # Input validation
+    if args.iterations < 1:
+        print("Error: --iterations must be a positive integer.", file=sys.stderr)
+        sys.exit(1)
+
+    if args.pools:
+        try:
+            json.loads(args.pools)
+        except json.JSONDecodeError as e:
+            print(f"Error: invalid JSON for --pools: {e}", file=sys.stderr)
+            sys.exit(1)
 
     scenarios = SCENARIOS if args.run_all else [args.scenario]
     all_reports = []
 
     for scenario in scenarios:
         try:
+            log.info("Running scenario: %s (%d iterations)", scenario, args.iterations)
             report = _run_scenario(args, scenario)
             all_reports.append(report)
+            log.info(
+                "Scenario %s complete — risk score: %.1f",
+                scenario,
+                report.sim_result.risk_score,
+            )
+        except (ValueError, TypeError) as e:
+            print(f"Error: {e}", file=sys.stderr)
+            sys.exit(1)
         except Exception as e:
+            log.exception("Unexpected error running %s", scenario)
             print(f"Error running {scenario}: {e}", file=sys.stderr)
             sys.exit(1)
 
@@ -188,4 +218,4 @@ def main(argv: list[str] | None = None) -> None:
             json_data = json_data[0]
         with open(args.output, "w") as f:
             json.dump(json_data, f, indent=2, default=str)
-        print(f"Report written to {args.output}")
+        log.info("Report written to %s", args.output)

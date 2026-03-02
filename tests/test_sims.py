@@ -106,6 +106,16 @@ class TestSimulate51Attack:
         ]:
             assert key in result.metadata
 
+    def test_extreme_iterations_reasonable_runtime(self, network_state):
+        """10000 iterations should complete in reasonable time."""
+        start = time.time()
+        result = simulate_51_attack(
+            network_state, attacker_hashpower=0.3, iterations=10000
+        )
+        elapsed = time.time() - start
+        assert elapsed < 10.0
+        assert result.iterations == 10000
+
 
 # ---------- Quantum threat tests ----------
 
