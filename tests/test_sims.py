@@ -7,6 +7,7 @@ import pytest
 from btc_threat_sim.data import build_network_graph
 from btc_threat_sim.models import SimResult
 from btc_threat_sim.sims.fifty_one import simulate_51_attack
+from btc_threat_sim.sims.quantum import simulate_quantum_threat
 
 
 @pytest.fixture
@@ -103,3 +104,79 @@ class TestSimulate51Attack:
             "geo_multiplier",
         ]:
             assert key in result.metadata
+
+
+# ---------- Quantum threat tests ----------
+
+
+class TestSimulateQuantumThreat:
+    """Tests for the quantum threat simulation."""
+
+    def test_returns_sim_result(self, network_state):
+        result = simulate_quantum_threat(network_state, quantum_capability=0.5, iterations=100)
+        assert isinstance(result, SimResult)
+        assert result.scenario == "quantum_break"
+
+    def test_has_valid_fields(self, network_state):
+        result = simulate_quantum_threat(network_state, quantum_capability=0.5, iterations=100)
+        assert 0.0 <= result.risk_score <= 100.0
+        assert 0.0 <= result.mean <= 1.0
+        assert result.std_dev >= 0.0
+        assert result.iterations == 100
+        assert len(result.raw_results) == 100
+
+    def test_higher_capability_higher_risk(self, network_state):
+        low = simulate_quantum_threat(
+            network_state, quantum_capability=0.3, iterations=5000
+        )
+        high = simulate_quantum_threat(
+            network_state, quantum_capability=0.9, iterations=5000
+        )
+        assert high.risk_score > low.risk_score
+
+    def test_interplanetary_higher_risk(self, network_state):
+        without = simulate_quantum_threat(
+            network_state, quantum_capability=0.7, include_interplanetary=False, iterations=5000
+        )
+        with_ip = simulate_quantum_threat(
+            network_state, quantum_capability=0.7, include_interplanetary=True, iterations=5000
+        )
+        assert with_ip.risk_score >= without.risk_score
+
+    def test_zero_capability_near_zero_risk(self, network_state):
+        result = simulate_quantum_threat(
+            network_state, quantum_capability=0.0, iterations=100
+        )
+        assert result.risk_score == 0.0
+
+    def test_full_capability_high_risk(self, network_state):
+        result = simulate_quantum_threat(
+            network_state, quantum_capability=1.0, iterations=5000
+        )
+        assert result.risk_score > 50
+
+    def test_metadata_contains_quantum_keys(self, network_state):
+        result = simulate_quantum_threat(network_state, quantum_capability=0.5, iterations=100)
+        assert "time_to_break_mean" in result.metadata
+        assert "latency_factor" in result.metadata
+        assert "quantum_capability" in result.metadata
+        assert "effective_bits" in result.metadata
+
+    def test_latency_factor_value(self, network_state):
+        result_no = simulate_quantum_threat(
+            network_state, quantum_capability=0.5, include_interplanetary=False, iterations=100
+        )
+        result_yes = simulate_quantum_threat(
+            network_state, quantum_capability=0.5, include_interplanetary=True, iterations=100
+        )
+        assert result_no.metadata["latency_factor"] == 1.0
+        assert result_yes.metadata["latency_factor"] > 1.0
+
+    def test_time_to_break_decreases_with_capability(self, network_state):
+        low = simulate_quantum_threat(
+            network_state, quantum_capability=0.3, iterations=5000
+        )
+        high = simulate_quantum_threat(
+            network_state, quantum_capability=0.9, iterations=5000
+        )
+        assert high.metadata["time_to_break_mean"] < low.metadata["time_to_break_mean"]
