@@ -12,10 +12,12 @@ dependencies = [
     "scipy",
     "networkx",
     "rich",
+    "fastapi",
+    "uvicorn",
 ]
 
 [project.optional-dependencies]
-dev = ["pytest"]
+dev = ["pytest", "httpx"]
 
 [project.scripts]
 btc-threat-sim = "btc_threat_sim.cli:main"

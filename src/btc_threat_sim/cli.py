@@ -95,6 +95,11 @@ def _build_parser() -> argparse.ArgumentParser:
         dest="run_all",
         help="Run all three scenarios sequentially",
     )
+    parser.add_argument(
+        "--serve",
+        action="store_true",
+        help="Start FastAPI server on port 8000",
+    )
     return parser
 
 
@@ -176,6 +181,16 @@ def main(argv: list[str] | None = None) -> None:
 
     parser = _build_parser()
     args = parser.parse_args(argv)
+
+    # --serve: start FastAPI server and return
+    if args.serve:
+        import uvicorn
+
+        from btc_threat_sim.api import app
+
+        log.info("Starting FastAPI server on http://0.0.0.0:8000")
+        uvicorn.run(app, host="0.0.0.0", port=8000)
+        return
 
     # Input validation
     if args.iterations < 1:
