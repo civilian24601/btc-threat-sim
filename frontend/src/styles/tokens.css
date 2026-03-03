@@ -1,0 +1,60 @@
+/* ═══════════════════════════════════════════════════════════════════
+   TACTICAL HUD — Design Tokens
+   btc-threat-sim design system foundation
+   ═══════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* ── PALETTE ──────────────────────────────────────────────────── */
+  --bg-void: #06060b;
+  --bg-surface: #0c0c14;
+  --bg-elevated: #12121e;
+  --bg-glass: rgba(255, 120, 0, 0.03);
+
+  /* ── BORDERS ──────────────────────────────────────────────────── */
+  --border-subtle: rgba(255, 120, 0, 0.08);
+  --border-glow: rgba(255, 120, 0, 0.25);
+  --border-hot: rgba(255, 120, 0, 0.5);
+
+  /* ── ACCENTS ──────────────────────────────────────────────────── */
+  --accent-orange: #ff6b00;
+  --accent-ember: #ff8c33;
+  --accent-flame: #ff4400;
+
+  /* ── TEXT ──────────────────────────────────────────────────────── */
+  --text-primary: #e8e4df;
+  --text-secondary: #8a8580;
+  --text-ghost: #4a4540;
+
+  /* ── RISK LEVELS ──────────────────────────────────────────────── */
+  --risk-low: #22c55e;
+  --risk-mid: #f59e0b;
+  --risk-high: #ff4400;
+  --risk-extreme: #dc2626;
+
+  /* ── GLOW ─────────────────────────────────────────────────────── */
+  --glow-orange: 0 0 20px rgba(255, 107, 0, 0.15), 0 0 60px rgba(255, 107, 0, 0.05);
+
+  /* ── GLASS ────────────────────────────────────────────────────── */
+  --glass-blur: 12px;
+  --glass-border: 1px solid var(--border-subtle);
+  --glass-bg: linear-gradient(
+    135deg,
+    rgba(255, 120, 0, 0.04) 0%,
+    rgba(255, 120, 0, 0.01) 50%,
+    rgba(0, 0, 0, 0.2) 100%
+  );
+
+  /* ── TYPOGRAPHY ───────────────────────────────────────────────── */
+  --font-display: 'JetBrains Mono', monospace;
+  --font-body: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* ── EASING ───────────────────────────────────────────────────── */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+  /* ── SPACING ──────────────────────────────────────────────────── */
+  --panel-padding: clamp(16px, 2vw, 24px);
+  --panel-radius: 8px;
+  --panel-gap: 16px;
+}
